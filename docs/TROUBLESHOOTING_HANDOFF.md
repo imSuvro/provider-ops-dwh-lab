@@ -47,7 +47,9 @@ docker compose logs <service-name>
 docker compose --profile tools build tools
 docker compose --profile tools run --rm tools python scripts/seed_mongo.py
 docker compose --profile tools run --rm tools python scripts/run_etl.py
-docker compose --profile tools run --rm tools dbt debug --project-dir dbt --profiles-dir dbt
+docker compose --profile tools run --rm tools dbt debug --project-dir dbt/provider_ops_dwh --profiles-dir dbt/provider_ops_dwh
+docker compose --profile tools run --rm tools dbt run --project-dir dbt/provider_ops_dwh --profiles-dir dbt/provider_ops_dwh
+docker compose --profile tools run --rm tools dbt test --project-dir dbt/provider_ops_dwh --profiles-dir dbt/provider_ops_dwh
 docker compose down
 git status
 git diff
@@ -81,8 +83,8 @@ Some folders are placeholders until their MVP task is implemented.
 - PostgreSQL initialization scripts have not been applied to an existing
   volume.
 - A required archive partition or CSV input file is missing or malformed.
-- dbt is using the wrong project/profile path or database credentials.
-- Downstream dbt models or reports have not been implemented yet.
+- dbt is using the wrong nested project/profile path or database credentials.
+- Analytical marts or reports have not been implemented yet.
 - Local volumes contain stale state from an earlier schema version.
 
 ## What to paste when asking for help
