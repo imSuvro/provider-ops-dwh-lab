@@ -1,0 +1,19 @@
+name: provider_ops_dwh_lab
+version: "1.0.0"
+config-version: 2
+
+profile: provider_ops_dwh_lab
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  provider_ops_dwh_lab:
+    +materialized: view

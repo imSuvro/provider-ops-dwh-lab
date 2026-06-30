@@ -1,0 +1,6 @@
+dbt-core>=1.9,<2.0
+dbt-postgres>=1.9,<2.0
+pandas>=2.2,<3.0
+psycopg[binary]>=3.2,<4.0
+pymongo>=4.10,<5.0
+python-dotenv>=1.0,<2.0
