@@ -27,15 +27,15 @@ Synthetic MongoDB operational data + synthetic CSV files
 ## Current status
 
 The local services, dependency image, synthetic MongoDB seed records, synthetic
-CSV source files, PostgreSQL schema initialization, Python ETL, and dbt staging
-models and tests are present. Analytical marts, reporting queries, and
+CSV source files, PostgreSQL schema initialization, Python ETL, dbt staging
+models, analytics marts, and data tests are present. Reporting queries and
 dashboards are planned but not yet implemented.
 
 ## Technology
 
 - MongoDB for the simulated operational source
 - CSV files for batch and reference sources
-- Python, pandas, PyMongo, and Psycopg for future data jobs
+- Python, pandas, PyMongo, and Psycopg for extraction and loading jobs
 - PostgreSQL for local raw, staging, marts, and audit schemas
 - dbt Core with `dbt-postgres` for transformations and tests
 - Metabase for future dashboards and SQL exploration
@@ -283,19 +283,39 @@ make dbt-test
 ```
 
 The dbt profile reads the PostgreSQL host, port, user, password, and database
-from environment variables. Staging views are created in the `staging` schema.
-They flatten the raw MongoDB JSON documents, normalize operational values, and
-exclude patient names, birth dates, phone numbers, member references, shipment
-tracking references, and coordinator free text.
+from environment variables. Staging views are created in the `staging` schema,
+and analytics marts are materialized as tables in the `marts` schema. The
+staging layer flattens the raw MongoDB JSON documents, normalizes operational
+values, and excludes patient names, birth dates, phone numbers, member
+references, shipment tracking references, and coordinator free text.
 
 Inspect the resulting views with:
 
 ```powershell
 docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dv staging.*"
 docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT * FROM staging.stg_enrollments LIMIT 10;"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dt marts.*"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT * FROM marts.mart_billable_activity ORDER BY patient_month, customer_name, patient_id;"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT * FROM marts.mart_data_quality_issues ORDER BY issue_type, record_id;"
 ```
 
-Analytical marts are not implemented yet.
+The analytics layer includes:
+
+- `mart_enrollment_funnel`: enrollment and patient counts by customer,
+  provider, program, and enrollment status
+- `mart_patient_month`: one row per observed patient, program, and month
+- `mart_billable_activity`: patient-months that satisfy the local billing
+  readiness rules
+- `mart_clinic_or_customer_performance`: monthly customer/program operational
+  summary
+- `mart_data_quality_issues`: missing mappings, missing consent, invalid
+  statuses, and duplicate patient external IDs
+
+Billing readiness is a learning-project rule, not a claim submission rule. A
+patient-month is ready when its enrollment is active, consent is completed,
+the program's minimum timer minutes are met, and any required device is
+delivered by month-end. The source billing candidate flag remains separate so
+the computed result can be compared with the synthetic billing export.
 
 ## Repository layout
 

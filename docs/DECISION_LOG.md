@@ -14,6 +14,7 @@ documentation when a decision changes.
 | Separate PostgreSQL into `raw`, `staging`, `marts`, and `audit` schemas. | Keep source capture, transformation layers, reporting models, and load history logically distinct. | Accepted |
 | Update or insert local raw rows by source record ID. | Keep reruns approachable and duplicate-free while the dated archive and audit tables retain execution history. | Accepted |
 | Exclude unnecessary sensitive source fields from dbt staging views. | Keep the learning models useful for relationships and operations without propagating names, birth dates, phone numbers, member references, tracking references, or free text. | Accepted |
+| Compute billing readiness from active enrollment, completed consent, required timer minutes, and any required delivered device. | Make the learning rule explicit and testable while retaining the source billing candidate separately for comparison. | Accepted |
 | Use synthetic data only. | Protect privacy and make the repository safe for learning and portfolio use. | Accepted |
 | Keep AWS deployment out of the MVP. | Prioritize warehouse fundamentals before infrastructure complexity. | Accepted |
 
