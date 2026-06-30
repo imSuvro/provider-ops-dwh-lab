@@ -26,11 +26,10 @@ Synthetic MongoDB operational data + synthetic CSV files
 
 ## Current status
 
-The local services, dependency image, minimal dbt project, synthetic MongoDB
-seed records, synthetic CSV source files, and PostgreSQL schema initialization
-scripts are present. Python jobs extract the source data and load PostgreSQL raw
-and audit tables. Warehouse models, transformation tests, reporting queries,
-and dashboards are planned but not yet implemented.
+The local services, dependency image, synthetic MongoDB seed records, synthetic
+CSV source files, PostgreSQL schema initialization, Python ETL, and dbt staging
+models and tests are present. Analytical marts, reporting queries, and
+dashboards are planned but not yet implemented.
 
 ## Technology
 
@@ -38,7 +37,7 @@ and dashboards are planned but not yet implemented.
 - CSV files for batch and reference sources
 - Python, pandas, PyMongo, and Psycopg for future data jobs
 - PostgreSQL for local raw, staging, marts, and audit schemas
-- dbt Core with `dbt-postgres` for future transformations and tests
+- dbt Core with `dbt-postgres` for transformations and tests
 - Metabase for future dashboards and SQL exploration
 - Docker Compose for the local environment
 
@@ -260,16 +259,43 @@ When adding PostgreSQL as a Metabase data source later, use host `postgres`
 (not `localhost`), port `5432`, database `provider_ops_dwh`, and the PostgreSQL
 username and password from `.env`.
 
-### Optional Python/dbt tools
+### Run dbt
 
-Build the existing tools image and check the dbt connection:
+Run the ETL first so the raw tables contain source records. Then install dbt
+dependencies, build the staging views, and run the data tests:
 
 ```powershell
 docker compose --profile tools build tools
-docker compose --profile tools run --rm tools dbt debug --project-dir dbt --profiles-dir dbt
+docker compose --profile tools run --rm tools dbt deps --project-dir dbt/provider_ops_dwh --profiles-dir dbt/provider_ops_dwh
+docker compose --profile tools run --rm tools dbt run --project-dir dbt/provider_ops_dwh --profiles-dir dbt/provider_ops_dwh
+docker compose --profile tools run --rm tools dbt test --project-dir dbt/provider_ops_dwh --profiles-dir dbt/provider_ops_dwh
 ```
 
-dbt transformations and analytical models are not implemented yet.
+No external dbt packages are currently declared, so `dbt deps` is a no-op and
+reports that no packages were found.
+
+With GNU Make, the equivalent commands are:
+
+```powershell
+make dbt-deps
+make dbt-run
+make dbt-test
+```
+
+The dbt profile reads the PostgreSQL host, port, user, password, and database
+from environment variables. Staging views are created in the `staging` schema.
+They flatten the raw MongoDB JSON documents, normalize operational values, and
+exclude patient names, birth dates, phone numbers, member references, shipment
+tracking references, and coordinator free text.
+
+Inspect the resulting views with:
+
+```powershell
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dv staging.*"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT * FROM staging.stg_enrollments LIMIT 10;"
+```
+
+Analytical marts are not implemented yet.
 
 ## Repository layout
 
@@ -278,7 +304,7 @@ data/input/    Committed synthetic CSV source files
 data/csv/      Future generated CSV files
 raw_archive/   Local immutable-style extraction snapshots
 scripts/       Python extraction and loading jobs
-dbt/           dbt models, tests, and configuration
+dbt/provider_ops_dwh/  dbt models, tests, and configuration
 sql/init/      PostgreSQL schema and table initialization
 sql/           Future validation and reporting SQL
 docs/          Architecture, scope, decisions, and working guidance

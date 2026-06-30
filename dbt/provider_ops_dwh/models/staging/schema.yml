@@ -1,0 +1,403 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: Clean customer records from MongoDB.
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_code
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_name
+        data_tests:
+          - not_null
+
+  - name: stg_providers
+    description: Clean provider records and customer ownership.
+    columns:
+      - name: provider_id
+        data_tests:
+          - not_null
+          - unique
+      - name: provider_external_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+
+  - name: stg_patients
+    description: >
+      Patient operational identifiers without names, birth dates, phone
+      numbers, or other unnecessary sensitive attributes.
+    columns:
+      - name: patient_id
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_external_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: primary_provider_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_providers')
+                field: provider_id
+
+  - name: stg_programs
+    description: Program reference records.
+    columns:
+      - name: program_id
+        data_tests:
+          - not_null
+          - unique
+      - name: program_code
+        data_tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ['RPM', 'RTM', 'CCM', 'CoCM', 'APCM']
+      - name: program_name
+        data_tests:
+          - not_null
+
+  - name: stg_enrollments
+    description: Patient program enrollment lifecycle records.
+    columns:
+      - name: enrollment_id
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: provider_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_providers')
+                field: provider_id
+      - name: program_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: enrollment_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - RECEIVED
+                  - ELIGIBLE
+                  - CONSENTED
+                  - ONBOARDED
+                  - ACTIVE
+                  - DECLINED
+
+  - name: stg_consents
+    description: Enrollment consent status and operational timestamps.
+    columns:
+      - name: consent_id
+        data_tests:
+          - not_null
+          - unique
+      - name: enrollment_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_enrollments')
+                field: enrollment_id
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: consent_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['PENDING', 'COMPLETED', 'DECLINED']
+
+  - name: stg_timer_sessions
+    description: Program activity time recorded for a patient enrollment.
+    columns:
+      - name: timer_session_id
+        data_tests:
+          - not_null
+          - unique
+      - name: enrollment_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_enrollments')
+                field: enrollment_id
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: provider_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_providers')
+                field: provider_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: duration_minutes
+        data_tests:
+          - not_null
+      - name: session_date
+        data_tests:
+          - not_null
+
+  - name: stg_device_orders
+    description: Device fulfillment status without shipment tracking identifiers.
+    columns:
+      - name: device_order_id
+        data_tests:
+          - not_null
+          - unique
+      - name: enrollment_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_enrollments')
+                field: enrollment_id
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: order_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ORDERED', 'SHIPPED', 'DELIVERED', 'DELAYED']
+
+  - name: stg_coordinator_notes
+    description: >
+      Coordinator note metadata without free-text notes or coordinator names.
+    columns:
+      - name: coordinator_note_id
+        data_tests:
+          - not_null
+          - unique
+      - name: enrollment_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_enrollments')
+                field: enrollment_id
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: note_type
+        data_tests:
+          - not_null
+
+  - name: stg_vob_files
+    description: >
+      Verification-of-benefits rows without source member references.
+    columns:
+      - name: vob_id
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: coverage_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ACTIVE', 'INACTIVE', 'PENDING']
+
+  - name: stg_billing_exports
+    description: Monthly billing candidate rows.
+    columns:
+      - name: export_id
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: patient_month
+        data_tests:
+          - not_null
+      - name: billable_candidate
+        data_tests:
+          - not_null
+      - name: currency
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['USD']
+
+  - name: stg_customer_roster_uploads
+    description: >
+      Customer roster identifiers without names, birth dates, or phone numbers.
+    columns:
+      - name: roster_record_id
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: provider_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_providers')
+                field: provider_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code

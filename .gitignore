@@ -4,9 +4,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
-dbt/target/
-dbt/logs/
-dbt/dbt_packages/
+dbt/**/target/
+dbt/**/logs/
+dbt/**/dbt_packages/
+dbt/**/.user.yml
 
 raw_archive/*
 !raw_archive/.gitkeep

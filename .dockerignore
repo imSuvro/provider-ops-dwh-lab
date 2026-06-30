@@ -6,6 +6,7 @@ __pycache__
 
 data/csv
 raw_archive
-dbt/target
-dbt/logs
-dbt/dbt_packages
+dbt/**/target
+dbt/**/logs
+dbt/**/dbt_packages
+dbt/**/.user.yml

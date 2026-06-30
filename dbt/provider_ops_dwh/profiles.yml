@@ -1,4 +1,4 @@
-provider_ops_dwh_lab:
+provider_ops_dwh:
   target: dev
   outputs:
     dev:
@@ -8,5 +8,5 @@ provider_ops_dwh_lab:
       user: "{{ env_var('POSTGRES_USER', 'warehouse') }}"
       password: "{{ env_var('POSTGRES_PASSWORD', 'warehouse') }}"
       dbname: "{{ env_var('POSTGRES_DB', 'provider_ops_dwh') }}"
-      schema: analytics
+      schema: staging
       threads: 4
