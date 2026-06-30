@@ -1,0 +1,13 @@
+vob_id,patient_id,customer_id,payer_name,member_reference,coverage_status,verified_on,program,estimated_copay
+vob_001,patient_001,cust_001,DemoCare Health Plan,DEMO-MBR-001,ACTIVE,2026-01-03,RPM,15.00
+vob_002,patient_002,cust_001,Example Mutual Health,DEMO-MBR-002,ACTIVE,2026-01-04,RTM,20.00
+vob_003,patient_003,cust_001,DemoCare Health Plan,DEMO-MBR-003,ACTIVE,2026-01-05,CCM,10.00
+vob_004,patient_004,cust_001,Sample State Benefit,DEMO-MBR-004,INACTIVE,2026-01-06,CoCM,0.00
+vob_005,patient_005,cust_002,Harbor Demo Insurance,DEMO-MBR-005,ACTIVE,2026-01-03,APCM,5.00
+vob_006,patient_006,cust_002,Harbor Demo Insurance,DEMO-MBR-006,PENDING,2026-01-11,CCM,12.50
+vob_007,patient_007,cust_002,Example Mutual Health,DEMO-MBR-007,ACTIVE,2026-01-07,RTM,25.00
+vob_008,patient_008,cust_002,Sample State Benefit,DEMO-MBR-008,ACTIVE,2026-01-08,CoCM,0.00
+vob_009,patient_009,cust_003,Summit Demo Coverage,DEMO-MBR-009,ACTIVE,2026-01-04,CCM,10.00
+vob_010,patient_010,cust_003,Summit Demo Coverage,DEMO-MBR-010,INACTIVE,2026-01-05,RPM,0.00
+vob_011,patient_011,cust_003,DemoCare Health Plan,DEMO-MBR-011,PENDING,2026-01-12,CoCM,15.00
+vob_012,patient_012,cust_003,Example Mutual Health,DEMO-MBR-012,ACTIVE,2026-01-06,RTM,20.00

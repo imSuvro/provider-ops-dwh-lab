@@ -26,10 +26,10 @@ Synthetic MongoDB operational data + synthetic CSV files
 
 ## Current status
 
-The repository is an early scaffold. The local services, dependency image, and
-minimal dbt project are present. Synthetic datasets, extraction/loading jobs,
-warehouse models, tests, reporting queries, and dashboards are planned but not
-yet implemented.
+The local services, dependency image, minimal dbt project, synthetic MongoDB
+seed records, and synthetic CSV source files are present. Extraction/loading
+jobs, warehouse models, tests, reporting queries, and dashboards are planned
+but not yet implemented.
 
 ## Technology
 
@@ -126,6 +126,37 @@ docker compose exec mongodb mongosh --username mongo --password mongo --authenti
 Use the credentials and database configured in `.env` if you changed the
 defaults.
 
+### Seed and reset demo source data
+
+The seed script loads deterministic synthetic records into the `customers`,
+`providers`, `patients`, `programs`, `enrollments`, `consents`,
+`timer_sessions`, `device_orders`, and `coordinator_notes` collections.
+
+With the MongoDB service running, use the tools container:
+
+```powershell
+docker compose --profile tools build tools
+docker compose --profile tools run --rm tools python scripts/seed_mongo.py
+```
+
+The script replaces only records tagged with its demo batch, so it is safe to
+rerun. To remove that batch without deleting other MongoDB records:
+
+```powershell
+docker compose --profile tools run --rm tools python scripts/reset_demo_data.py --yes
+```
+
+If the Python dependencies are installed on the host, the equivalent commands
+are:
+
+```powershell
+python scripts/seed_mongo.py
+python scripts/reset_demo_data.py --yes
+```
+
+The committed synthetic CSV inputs are in `data/input/`. Resetting MongoDB does
+not remove or modify those files.
+
 ### Connect to PostgreSQL
 
 Clients running on the host can use:
@@ -170,7 +201,8 @@ No extraction or loading jobs are implemented yet.
 ## Repository layout
 
 ```text
-data/          Synthetic CSV source files
+data/input/    Committed synthetic CSV source files
+data/csv/      Future generated CSV files
 raw_archive/   Local immutable-style extraction snapshots
 scripts/       Python extraction and loading jobs
 dbt/           dbt models, tests, and configuration
@@ -178,7 +210,8 @@ sql/           Validation and reporting SQL
 docs/          Architecture, scope, decisions, and working guidance
 ```
 
-Generated files in `data/csv/` and `raw_archive/` are ignored by Git.
+Committed fixtures in `data/input/` are intentionally versioned. Generated
+files in `data/csv/` and `raw_archive/` are ignored by Git.
 
 ## Supporting documentation
 

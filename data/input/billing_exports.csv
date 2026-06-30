@@ -1,0 +1,17 @@
+export_id,patient_id,customer_id,patient_month,program,billable_candidate,amount,currency,exported_at
+billing_001,patient_001,cust_001,2026-01-01,RPM,true,50.00,USD,2026-02-02T08:00:00Z
+billing_002,patient_001,cust_001,2026-01-01,CCM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_003,patient_002,cust_001,2026-01-01,RTM,true,45.00,USD,2026-02-02T08:00:00Z
+billing_004,patient_002,cust_001,2026-01-01,APCM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_005,patient_003,cust_001,2026-01-01,CCM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_006,patient_005,cust_002,2026-01-01,APCM,true,75.00,USD,2026-02-02T08:00:00Z
+billing_007,patient_005,cust_002,2026-01-01,RPM,true,50.00,USD,2026-02-02T08:00:00Z
+billing_008,patient_007,cust_002,2026-01-01,RTM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_009,patient_008,cust_002,2026-01-01,CoCM,true,95.00,USD,2026-02-02T08:00:00Z
+billing_010,patient_009,cust_003,2026-01-01,APCM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_011,patient_009,cust_003,2026-01-01,CCM,true,60.00,USD,2026-02-02T08:00:00Z
+billing_012,patient_010,cust_003,2026-01-01,RPM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_013,patient_011,cust_003,2026-01-01,CoCM,false,0.00,USD,2026-02-02T08:00:00Z
+billing_014,patient_012,cust_003,2026-01-01,RTM,true,45.00,USD,2026-02-02T08:00:00Z
+billing_015,patient_001,cust_001,2026-02-01,RPM,true,50.00,USD,2026-03-02T08:00:00Z
+billing_016,patient_012,cust_003,2026-02-01,RTM,true,45.00,USD,2026-03-02T08:00:00Z
