@@ -1,28 +1,54 @@
 # Provider Operations Data Warehouse Lab
 
-A small, local healthcare operations data warehouse built as a personal
-learning and portfolio project. It shows how operational and file-based data
-can move through a practical analytics pipeline while remaining approachable
-for managers, technical leaders, recruiters, and engineers new to data
-warehousing.
+## What this project is
+
+This is a small, runnable healthcare operations data warehouse built as a
+personal learning and portfolio lab. It combines invented MongoDB records and
+synthetic CSV feeds, preserves source extracts, loads PostgreSQL, transforms
+the data with dbt Core, and exposes management-oriented marts for SQL and
+Metabase reporting.
+
+The project is deliberately local and inspectable. It gives managers and
+technical leaders a concrete pipeline to discuss without implying that a
+production platform or real healthcare data has been implemented.
 
 ## Why it exists
 
 The lab is preparation for contributing to and eventually leading a real data
-warehouse initiative. It focuses on architecture, data flow, testing,
-documentation, and reporting tradeoffs rather than enterprise-scale claims.
+warehouse initiative. It turns warehouse concepts—source ownership, raw
+retention, dimensional grain, data quality, metric definitions, orchestration,
+and reporting—into something that can be run and reviewed end to end.
+
+It is also a conversation aid: the working demo makes it easier to separate
+what has been learned locally from the business, security, scale, and
+operational decisions that still need owners before a real implementation.
 
 ## Architecture
 
 ```text
-Synthetic MongoDB operational data + synthetic CSV files
-  -> Python extraction/loading jobs
-  -> local raw archive
-  -> PostgreSQL raw and staging tables
-  -> dbt Core transformations
-  -> PostgreSQL analytics marts
-  -> Metabase dashboards and SQL reports
+Synthetic MongoDB collections          Synthetic CSV files
+               |                               |
+               +--------- Python ETL ----------+
+                              |
+                 dated local raw_archive
+                              |
+                    PostgreSQL raw schema
+                              |
+                      dbt staging views
+                              |
+                 dbt analytics mart tables
+                              |
+                    Metabase / SQL reports
+
+               ETL run and file metadata
+                              |
+                    PostgreSQL audit schema
 ```
+
+The layers are intentionally separated. Python captures and loads source data;
+the raw layer retains source-shaped records; dbt standardizes and tests them;
+and the marts provide stable reporting grains. The audit schema records load
+runs and processed files.
 
 ## Current status
 
@@ -50,15 +76,32 @@ claim.
 
 ## Production mapping
 
-| Local lab component | Possible future production equivalent |
+The local design maps to the proposed real data warehouse architecture as
+follows:
+
+| Local lab component | Proposed production mapping |
 | --- | --- |
 | Local PostgreSQL | Amazon RDS PostgreSQL |
-| `raw_archive/` | Controlled Amazon S3 file archive |
-| Python scripts | Scheduled jobs, backend cron jobs, or AWS Lambda |
-| dbt Core | Transformation layer |
+| Local `raw_archive/` | Amazon S3 controlled archive |
+| Python scripts | Scheduled jobs or AWS Lambda |
+| dbt Core | dbt Core |
 | Metabase | Metabase or Amazon QuickSight |
 
-These mappings explain the learning intent; AWS deployment is outside the MVP.
+This is a conceptual mapping, not a production design claim. The local pipeline
+helps test responsibilities and data flow, but it does not validate AWS
+networking, sizing, security, service levels, or operating cost.
+
+## Important limitations
+
+- Synthetic data only
+- Not production-ready
+- No real PHI
+- No AWS networking
+- No change data capture (CDC)
+- No real Provider Dashboard integration
+
+The demo also does not establish production billing rules, compliance,
+multi-tenant access controls, disaster recovery, or platform sizing.
 
 ## Local services
 
@@ -68,7 +111,45 @@ These mappings explain the learning intent; AWS deployment is outside the MVP.
 - Git
 - Host ports `27017`, `5432`, and `3000` available, or different ports set in
   `.env`
-- GNU Make is optional
+- GNU Make for the one-command demo
+
+### Run the full demo
+
+From the repository root, run:
+
+```powershell
+make demo
+```
+
+The command:
+
+1. Creates `.env` from `.env.example` when it is missing.
+2. Starts MongoDB, PostgreSQL, and Metabase.
+3. Builds the reusable Python/dbt tools image.
+4. Seeds deterministic synthetic MongoDB records.
+5. Extracts MongoDB to `raw_archive/` and loads MongoDB and CSV data into the
+   PostgreSQL `raw` schema.
+6. Runs the dbt staging and mart models.
+7. Runs the dbt data tests.
+8. Prints the report query locations under `sql/reports/`.
+
+The seed and load behavior is repeatable: demo records and raw business rows
+are updated rather than duplicated, while audit history intentionally appends
+on each run. On first use, Docker image downloads make the command slower.
+
+After it completes:
+
+- Open Metabase at [http://localhost:3000](http://localhost:3000) and follow the
+  [dashboard setup guide](docs/metabase_dashboard_guide.md).
+- Run any query in `sql/reports/` against PostgreSQL for a ready-made
+  management view.
+- Use `make ps` to inspect services and `make down` to stop them without
+  deleting local data.
+
+The detailed commands below are useful when demonstrating or troubleshooting
+one layer at a time.
+
+### Manual environment setup
 
 Create the local environment file before starting the services:
 
@@ -299,17 +380,25 @@ docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT
 docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT * FROM marts.mart_data_quality_issues ORDER BY issue_type, record_id;"
 ```
 
-The analytics layer includes:
+## What the final marts represent
+
+The final marts are reporting contracts with explicit grains, not copies of
+source tables:
 
 - `mart_enrollment_funnel`: enrollment and patient counts by customer,
-  provider, program, and enrollment status
-- `mart_patient_month`: one row per observed patient, program, and month
+  provider, program, and current enrollment status; useful for showing where
+  patients sit in the operational funnel
+- `mart_patient_month`: one row per observed patient, program, and month; the
+  shared operational fact table behind readiness reporting
 - `mart_billable_activity`: patient-months that satisfy the local billing
-  readiness rules
+  readiness rules; useful for reviewing computed readiness against the
+  synthetic source candidate flag
 - `mart_clinic_or_customer_performance`: monthly customer/program operational
-  summary
+  totals for patients, consent, timer activity, delayed devices, and billing
+  readiness
 - `mart_data_quality_issues`: missing mappings, missing consent, invalid
-  statuses, and duplicate patient external IDs
+  statuses, and duplicate patient external IDs presented as an actionable
+  review queue
 
 Billing readiness is a learning-project rule, not a claim submission rule. A
 patient-month is ready when its enrollment is active, consent is completed,
@@ -332,6 +421,46 @@ docs/          Architecture, scope, decisions, and working guidance
 
 Committed fixtures in `data/input/` are intentionally versioned. Generated
 files in `data/csv/` and `raw_archive/` are ignored by Git.
+
+## What I learned from building it
+
+- A useful warehouse starts with agreed source ownership and business grain,
+  not with a dashboard.
+- Preserving a source-shaped raw layer and load audit trail makes failures,
+  reruns, and reconciliation easier to explain.
+- Staging models are the right boundary for type casting, naming, status
+  normalization, and removing fields that reporting does not need.
+- Shared marts prevent dashboard queries from inventing competing definitions
+  of enrollment, consent, activity, and billing readiness.
+- Data quality is more useful when modeled as a visible operational output,
+  rather than hidden inside pipeline logs.
+- A small end-to-end implementation exposes important production questions
+  earlier than an architecture diagram alone.
+
+## What should be confirmed before real implementation
+
+Before selecting services or onboarding any real data, confirm:
+
+- authoritative source systems, data owners, stable identifiers, source
+  history, deletion behavior, and file-feed contracts
+- required freshness, cutoff times, late-arriving data handling, recovery
+  objectives, and whether CDC is actually necessary
+- approved KPI definitions, especially enrollment conversion, timer
+  utilization, device fulfillment, and billability
+- PHI classification, minimum necessary fields, retention, deletion, masking,
+  encryption, audit, and non-production data rules
+- user roles, tenant isolation, SSO, service accounts, secrets management,
+  access approval, and export controls
+- RDS workload sizing, availability, backup, VPC, subnet, security-group, and
+  private-connectivity requirements
+- whether Metabase or QuickSight best fits governance, embedded analytics,
+  row-level access, licensing, and support ownership
+- how the warehouse or reporting layer would integrate with the real Provider
+  Dashboard, including API, identity, ownership, and support boundaries
+
+The detailed discovery checklist is in
+[Open questions for the CTO](docs/open_questions_for_cto.md). Durable decisions
+should be recorded in [the decision log](docs/DECISION_LOG.md).
 
 ## Supporting documentation
 

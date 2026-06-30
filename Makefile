@@ -2,8 +2,9 @@
 
 DBT_PROJECT_DIR := dbt/provider_ops_dwh
 DBT_ARGS := --project-dir $(DBT_PROJECT_DIR) --profiles-dir $(DBT_PROJECT_DIR)
+DOCKER ?= docker
 
-.PHONY: help setup up down seed etl reset ps logs build-tools dbt-deps dbt-debug dbt-run dbt-test
+.PHONY: help setup up down seed etl demo report-locations reset ps logs build-tools dbt-deps dbt-debug dbt-run dbt-test
 
 help:
 	@echo "Available commands:"
@@ -12,6 +13,8 @@ help:
 	@echo "  make down        Stop the local stack"
 	@echo "  make seed        Load the synthetic MongoDB demo records"
 	@echo "  make etl         Extract sources and load PostgreSQL raw tables"
+	@echo "  make demo        Run the complete local learning demo"
+	@echo "  make report-locations  Print the available report query paths"
 	@echo "  make reset       Stop the stack and delete local volumes"
 	@echo "  make ps          Show service status"
 	@echo "  make logs        Follow service logs"
@@ -25,37 +28,57 @@ setup:
 	@test -f .env || cp .env.example .env
 
 up:
-	docker compose up -d postgres mongodb metabase
+	$(DOCKER) compose up -d postgres mongodb metabase
 
 down:
-	docker compose down
+	$(DOCKER) compose down
 
 seed: build-tools
-	docker compose --profile tools run --rm tools python scripts/seed_mongo.py
+	$(DOCKER) compose --profile tools run --rm tools python scripts/seed_mongo.py
 
 etl: build-tools
-	docker compose --profile tools run --rm tools python scripts/run_etl.py
+	$(DOCKER) compose --profile tools run --rm tools python scripts/run_etl.py
+
+demo: setup
+	$(DOCKER) compose up -d postgres mongodb metabase
+	$(DOCKER) compose --profile tools build tools
+	$(DOCKER) compose --profile tools run --rm tools python scripts/seed_mongo.py
+	$(DOCKER) compose --profile tools run --rm tools python scripts/run_etl.py
+	$(DOCKER) compose --profile tools run --rm tools dbt deps $(DBT_ARGS)
+	$(DOCKER) compose --profile tools run --rm tools dbt run $(DBT_ARGS)
+	$(DOCKER) compose --profile tools run --rm tools dbt test $(DBT_ARGS)
+	@$(MAKE) --no-print-directory report-locations
+
+report-locations:
+	@echo "Demo complete. Reporting queries:"
+	@echo "  sql/reports/enrollment_funnel_by_customer.sql"
+	@echo "  sql/reports/consent_conversion_by_program.sql"
+	@echo "  sql/reports/timer_utilization_by_provider.sql"
+	@echo "  sql/reports/billable_patient_months.sql"
+	@echo "  sql/reports/customer_performance_summary.sql"
+	@echo "  sql/reports/data_quality_issues.sql"
+	@echo "Dashboard setup guide: docs/metabase_dashboard_guide.md"
 
 reset:
-	docker compose down --volumes
+	$(DOCKER) compose down --volumes
 
 ps:
-	docker compose ps
+	$(DOCKER) compose ps
 
 logs:
-	docker compose logs --follow
+	$(DOCKER) compose logs --follow
 
 build-tools:
-	docker compose --profile tools build tools
+	$(DOCKER) compose --profile tools build tools
 
 dbt-deps: build-tools
-	docker compose --profile tools run --rm tools dbt deps $(DBT_ARGS)
+	$(DOCKER) compose --profile tools run --rm tools dbt deps $(DBT_ARGS)
 
 dbt-debug: build-tools
-	docker compose --profile tools run --rm tools dbt debug $(DBT_ARGS)
+	$(DOCKER) compose --profile tools run --rm tools dbt debug $(DBT_ARGS)
 
 dbt-run: build-tools
-	docker compose --profile tools run --rm tools dbt run $(DBT_ARGS)
+	$(DOCKER) compose --profile tools run --rm tools dbt run $(DBT_ARGS)
 
 dbt-test: build-tools
-	docker compose --profile tools run --rm tools dbt test $(DBT_ARGS)
+	$(DOCKER) compose --profile tools run --rm tools dbt test $(DBT_ARGS)
