@@ -17,6 +17,14 @@ AI agents must not invent production usage, scale, compliance, security,
 reliability, performance, or business-impact claims. They must not expand a task
 into adjacent features without explicit approval.
 
+## Change attribution
+
+This document may acknowledge AI assistance as part of the overall project
+workflow. Individual branches, commits, pull requests, changelog entries,
+comments, and generated files must use normal human engineering language and
+describe the work itself rather than the assistant or tool used. Add co-author
+trailers only when the human explicitly requests them.
+
 ## Human responsibilities
 
 Humans own:
