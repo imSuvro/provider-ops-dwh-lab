@@ -27,16 +27,16 @@ Synthetic MongoDB operational data + synthetic CSV files
 ## Current status
 
 The local services, dependency image, minimal dbt project, synthetic MongoDB
-seed records, and synthetic CSV source files are present. Extraction/loading
-jobs, warehouse models, tests, reporting queries, and dashboards are planned
-but not yet implemented.
+seed records, synthetic CSV source files, and PostgreSQL schema initialization
+scripts are present. Extraction/loading jobs, warehouse models, tests,
+reporting queries, and dashboards are planned but not yet implemented.
 
 ## Technology
 
 - MongoDB for the simulated operational source
 - CSV files for batch and reference sources
 - Python, pandas, PyMongo, and Psycopg for future data jobs
-- PostgreSQL for local raw, staging, and marts schemas
+- PostgreSQL for local raw, staging, marts, and audit schemas
 - dbt Core with `dbt-postgres` for future transformations and tests
 - Metabase for future dashboards and SQL exploration
 - Docker Compose for the local environment
@@ -178,6 +178,36 @@ docker compose exec postgres psql -U warehouse -d provider_ops_dwh
 
 Again, use the values from `.env` if you changed the defaults.
 
+### Initialize and inspect PostgreSQL schemas
+
+PostgreSQL runs the files in `sql/init/` in numeric order when it creates a new
+data volume. They create the `raw`, `staging`, `marts`, and `audit` schemas,
+along with the raw source and audit tables.
+
+PostgreSQL initialization files do not rerun automatically for an existing
+data volume. To apply them without deleting local data, recreate the container
+to mount the scripts and run each file explicitly:
+
+```powershell
+docker compose up -d --force-recreate postgres
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -v ON_ERROR_STOP=1 -f /docker-entrypoint-initdb.d/001_create_schemas.sql
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -v ON_ERROR_STOP=1 -f /docker-entrypoint-initdb.d/002_create_raw_tables.sql
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -v ON_ERROR_STOP=1 -f /docker-entrypoint-initdb.d/003_create_audit_tables.sql
+```
+
+Use the PostgreSQL credentials and database configured in `.env` if you changed
+the defaults. The scripts use `IF NOT EXISTS`, so reapplying them preserves
+existing tables and data.
+
+Inspect the schemas and tables with:
+
+```powershell
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dn"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dt raw.*"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dt audit.*"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\d raw.csv_billing_exports"
+```
+
 ### Open Metabase
 
 Open [http://localhost:3000](http://localhost:3000), or use the port configured
@@ -206,7 +236,8 @@ data/csv/      Future generated CSV files
 raw_archive/   Local immutable-style extraction snapshots
 scripts/       Python extraction and loading jobs
 dbt/           dbt models, tests, and configuration
-sql/           Validation and reporting SQL
+sql/init/      PostgreSQL schema and table initialization
+sql/           Future validation and reporting SQL
 docs/          Architecture, scope, decisions, and working guidance
 ```
 
