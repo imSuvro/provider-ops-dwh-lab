@@ -1,6 +1,6 @@
 # Troubleshooting Handoff
 
-Use this page to give a new ChatGPT or Codex conversation enough context to help
+Use this page to give a new assistant conversation enough context to help
 without sharing sensitive data.
 
 ## Project summary
