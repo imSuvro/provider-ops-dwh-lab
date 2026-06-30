@@ -1,0 +1,248 @@
+version: 2
+
+models:
+  - name: mart_enrollment_funnel
+    description: Current enrollment counts by customer, provider, program, and status.
+    columns:
+      - name: enrollment_funnel_key
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: provider_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_providers')
+                field: provider_id
+      - name: program_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_id
+      - name: enrollment_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - RECEIVED
+                  - ELIGIBLE
+                  - CONSENTED
+                  - ONBOARDED
+                  - ACTIVE
+                  - DECLINED
+      - name: enrollment_count
+        data_tests:
+          - not_null
+      - name: patient_count
+        data_tests:
+          - not_null
+
+  - name: mart_patient_month
+    description: >
+      Patient-program-month operational state and computed billing readiness.
+    columns:
+      - name: patient_month_key
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_month
+        data_tests:
+          - not_null
+      - name: patient_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_patients')
+                field: patient_id
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: provider_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_providers')
+                field: provider_id
+      - name: program_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_id
+      - name: enrollment_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - RECEIVED
+                  - ELIGIBLE
+                  - CONSENTED
+                  - ONBOARDED
+                  - ACTIVE
+                  - DECLINED
+      - name: consent_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['PENDING', 'COMPLETED', 'DECLINED']
+      - name: device_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['ORDERED', 'SHIPPED', 'DELIVERED', 'DELAYED']
+      - name: is_active_enrollment
+        data_tests:
+          - not_null
+      - name: has_completed_consent
+        data_tests:
+          - not_null
+      - name: has_required_minutes
+        data_tests:
+          - not_null
+      - name: is_device_ready
+        data_tests:
+          - not_null
+      - name: is_billable_ready
+        data_tests:
+          - not_null
+
+  - name: mart_billable_activity
+    description: Patient-months meeting every computed billing-readiness rule.
+    columns:
+      - name: billable_activity_key
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('mart_patient_month')
+                field: patient_month_key
+      - name: patient_month
+        data_tests:
+          - not_null
+      - name: patient_id
+        data_tests:
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: program_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_code
+      - name: is_billable_ready
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+      - name: billing_alignment_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - READY_AND_SOURCE_CANDIDATE
+                  - READY_NOT_SOURCE_CANDIDATE
+
+  - name: mart_clinic_or_customer_performance
+    description: Monthly customer and program operational performance summary.
+    columns:
+      - name: customer_performance_key
+        data_tests:
+          - not_null
+          - unique
+      - name: patient_month
+        data_tests:
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: program_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_programs')
+                field: program_id
+      - name: patient_count
+        data_tests:
+          - not_null
+      - name: active_patient_count
+        data_tests:
+          - not_null
+      - name: consented_patient_count
+        data_tests:
+          - not_null
+      - name: timer_minutes
+        data_tests:
+          - not_null
+      - name: delayed_device_count
+        data_tests:
+          - not_null
+      - name: billable_candidate_count
+        data_tests:
+          - not_null
+      - name: billable_ready_patient_count
+        data_tests:
+          - not_null
+      - name: billable_readiness_rate
+        data_tests:
+          - not_null
+
+  - name: mart_data_quality_issues
+    description: Standardized source mapping, domain, and duplication issues.
+    columns:
+      - name: data_quality_issue_key
+        data_tests:
+          - not_null
+          - unique
+      - name: issue_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - MISSING_PROVIDER
+                  - MISSING_CONSENT
+                  - INVALID_ENROLLMENT_STATUS
+                  - INVALID_CONSENT_STATUS
+                  - INVALID_DEVICE_STATUS
+                  - DUPLICATE_PATIENT_EXTERNAL_ID
+                  - MISSING_CUSTOMER_MAPPING
+      - name: record_type
+        data_tests:
+          - not_null
+      - name: record_id
+        data_tests:
+          - not_null
