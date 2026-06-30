@@ -84,7 +84,8 @@ Some folders are placeholders until their MVP task is implemented.
   volume.
 - A required archive partition or CSV input file is missing or malformed.
 - dbt is using the wrong nested project/profile path or database credentials.
-- Reporting queries and dashboards have not been implemented yet.
+- Reporting queries are available, but Metabase dashboards must be created
+  manually from the dashboard guide.
 - Local volumes contain stale state from an earlier schema version.
 
 ## What to paste when asking for help

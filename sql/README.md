@@ -13,5 +13,22 @@ the files automatically only when initializing a new data volume. See the
 root README for non-destructive commands that apply them to an existing local
 volume.
 
-Future SQL files outside `init/` will contain lightweight validation queries
-and learning reports that complement dbt models and Metabase dashboards.
+`reports/` contains portable PostgreSQL queries for:
+
+- enrollment funnel by customer
+- consent conversion by program
+- timer utilization by provider
+- billable patient-month detail
+- customer performance summary
+- data quality issues
+
+Run a report with:
+
+```powershell
+Get-Content -Raw sql/reports/customer_performance_summary.sql |
+  docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh
+```
+
+The reports query dbt marts and are intended for direct SQL exploration or
+manual use in Metabase. See the
+[Metabase dashboard guide](../docs/metabase_dashboard_guide.md).

@@ -28,8 +28,8 @@ Synthetic MongoDB operational data + synthetic CSV files
 
 The local services, dependency image, synthetic MongoDB seed records, synthetic
 CSV source files, PostgreSQL schema initialization, Python ETL, dbt staging
-models, analytics marts, and data tests are present. Reporting queries and
-dashboards are planned but not yet implemented.
+models, analytics marts, data tests, reporting queries, and manual Metabase
+dashboard guidance are present. Metabase dashboards are not preconfigured.
 
 ## Technology
 
@@ -38,7 +38,7 @@ dashboards are planned but not yet implemented.
 - Python, pandas, PyMongo, and Psycopg for extraction and loading jobs
 - PostgreSQL for local raw, staging, marts, and audit schemas
 - dbt Core with `dbt-postgres` for transformations and tests
-- Metabase for future dashboards and SQL exploration
+- Metabase for manual dashboards and SQL exploration
 - Docker Compose for the local environment
 
 ## Data safety
@@ -326,7 +326,7 @@ raw_archive/   Local immutable-style extraction snapshots
 scripts/       Python extraction and loading jobs
 dbt/provider_ops_dwh/  dbt models, tests, and configuration
 sql/init/      PostgreSQL schema and table initialization
-sql/           Future validation and reporting SQL
+sql/reports/   Reporting SQL for marts and Metabase
 docs/          Architecture, scope, decisions, and working guidance
 ```
 
@@ -341,6 +341,7 @@ files in `data/csv/` and `raw_archive/` are ignored by Git.
 - [Source-to-target mapping](docs/source_to_target_mapping.md)
 - [Data dictionary](docs/data_dictionary.md)
 - [Open questions for the CTO](docs/open_questions_for_cto.md)
+- [Metabase dashboard guide](docs/metabase_dashboard_guide.md)
 - [Scope guardrails](docs/SCOPE_GUARDRAILS.md)
 - [AI development workflow](docs/AI_DEVELOPMENT_WORKFLOW.md)
 - [Branching and commit guidance](docs/BRANCHING_AND_COMMITS.md)
