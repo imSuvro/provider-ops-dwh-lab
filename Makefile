@@ -17,7 +17,7 @@ setup:
 	@test -f .env || cp .env.example .env
 
 up:
-	docker compose up -d postgres mongo metabase
+	docker compose up -d postgres mongodb metabase
 
 down:
 	docker compose down
