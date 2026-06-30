@@ -337,6 +337,10 @@ files in `data/csv/` and `raw_archive/` are ignored by Git.
 
 - [Project one-pager](docs/PROJECT_ONE_PAGER.md)
 - [Architecture notes](docs/architecture.md)
+- [KPI definitions](docs/kpi_definitions.md)
+- [Source-to-target mapping](docs/source_to_target_mapping.md)
+- [Data dictionary](docs/data_dictionary.md)
+- [Open questions for the CTO](docs/open_questions_for_cto.md)
 - [Scope guardrails](docs/SCOPE_GUARDRAILS.md)
 - [AI development workflow](docs/AI_DEVELOPMENT_WORKFLOW.md)
 - [Branching and commit guidance](docs/BRANCHING_AND_COMMITS.md)
