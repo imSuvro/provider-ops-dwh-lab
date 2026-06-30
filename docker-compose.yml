@@ -20,9 +20,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
     restart: unless-stopped
 
-  mongo:
+  mongodb:
     image: mongo:7
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
@@ -43,13 +44,14 @@ services:
           "--password",
           "${MONGO_PASSWORD:-mongo}",
           "--authenticationDatabase",
-          "admin",
+          "${MONGO_AUTH_SOURCE:-admin}",
           "--eval",
           "db.adminCommand('ping')",
         ]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
     restart: unless-stopped
 
   metabase:
@@ -63,6 +65,19 @@ services:
       - metabase_data:/metabase-data
     environment:
       MB_DB_FILE: /metabase-data/metabase.db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://localhost:3000/api/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
     restart: unless-stopped
 
   tools:
@@ -77,13 +92,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-warehouse}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warehouse}
       POSTGRES_DB: ${POSTGRES_DB:-provider_ops_dwh}
-      MONGO_URI: mongodb://${MONGO_USER:-mongo}:${MONGO_PASSWORD:-mongo}@mongo:27017/${MONGO_DATABASE:-provider_ops}?authSource=admin
+      MONGO_URI: mongodb://${MONGO_USER:-mongo}:${MONGO_PASSWORD:-mongo}@mongodb:27017/${MONGO_DATABASE:-provider_ops}?authSource=${MONGO_AUTH_SOURCE:-admin}
     volumes:
       - .:/app
     depends_on:
       postgres:
         condition: service_healthy
-      mongo:
+      mongodb:
         condition: service_healthy
 
 volumes:

@@ -41,7 +41,7 @@ components may not exist yet.
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d postgres mongo metabase
+docker compose up -d postgres mongodb metabase
 docker compose ps
 docker compose logs <service-name>
 docker compose --profile tools build tools

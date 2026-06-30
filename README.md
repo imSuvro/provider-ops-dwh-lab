@@ -60,30 +60,112 @@ claim.
 
 These mappings explain the learning intent; AWS deployment is outside the MVP.
 
-## Quick start
+## Local services
 
-Prerequisites: Docker Desktop with Docker Compose and Git. GNU Make is optional.
+### Prerequisites
+
+- Docker Desktop (or Docker Engine) with Docker Compose v2
+- Git
+- Host ports `27017`, `5432`, and `3000` available, or different ports set in
+  `.env`
+- GNU Make is optional
+
+Create the local environment file before starting the services:
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d postgres mongo metabase
+```
+
+On macOS or Linux, use `cp .env.example .env`. The included values are for
+local development only. Change them if needed, and never commit `.env`.
+
+### Start the services
+
+```powershell
+docker compose up -d mongodb postgres metabase
 docker compose ps
 ```
 
-Open Metabase at [http://localhost:3000](http://localhost:3000). For its
-PostgreSQL connection, use host `postgres`, port `5432`, database
-`provider_ops_dwh`, username `warehouse`, and password `warehouse` unless
-changed in `.env`.
+On the first run, Docker downloads the images and creates persistent volumes
+for MongoDB, PostgreSQL, and Metabase. Wait until `docker compose ps` reports
+the services as healthy before connecting.
 
-Build the Python/dbt tools image and check the dbt connection:
+### Stop the services
+
+```powershell
+docker compose down
+```
+
+This stops the containers without deleting their data. To intentionally reset
+all local database and Metabase state, run `docker compose down --volumes`.
+
+### Connect to MongoDB
+
+Python scripts running on the host can connect with the values in `.env`:
+
+```text
+Host: localhost
+Port: 27017
+Database: provider_ops
+Username: mongo
+Password: mongo
+Authentication database: admin
+URI: mongodb://mongo:mongo@localhost:27017/provider_ops?authSource=admin
+```
+
+If a Python process runs inside the Compose network, use `mongodb` instead of
+`localhost` as the host. The optional `tools` profile already exposes the
+equivalent `MONGO_URI` to its container.
+
+To open a MongoDB shell without installing one locally:
+
+```powershell
+docker compose exec mongodb mongosh --username mongo --password mongo --authenticationDatabase admin provider_ops
+```
+
+Use the credentials and database configured in `.env` if you changed the
+defaults.
+
+### Connect to PostgreSQL
+
+Clients running on the host can use:
+
+```text
+Host: localhost
+Port: 5432
+Database: provider_ops_dwh
+Username: warehouse
+Password: warehouse
+URI: postgresql://warehouse:warehouse@localhost:5432/provider_ops_dwh
+```
+
+To open `psql` inside the PostgreSQL container:
+
+```powershell
+docker compose exec postgres psql -U warehouse -d provider_ops_dwh
+```
+
+Again, use the values from `.env` if you changed the defaults.
+
+### Open Metabase
+
+Open [http://localhost:3000](http://localhost:3000), or use the port configured
+by `METABASE_PORT`. Complete Metabase's setup wizard in the browser.
+
+When adding PostgreSQL as a Metabase data source later, use host `postgres`
+(not `localhost`), port `5432`, database `provider_ops_dwh`, and the PostgreSQL
+username and password from `.env`.
+
+### Optional Python/dbt tools
+
+Build the existing tools image and check the dbt connection:
 
 ```powershell
 docker compose --profile tools build tools
 docker compose --profile tools run --rm tools dbt debug --project-dir dbt --profiles-dir dbt
 ```
 
-Stop the stack with `docker compose down`. Adding `--volumes` permanently
-deletes local lab state.
+No extraction or loading jobs are implemented yet.
 
 ## Repository layout
 
