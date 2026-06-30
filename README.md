@@ -28,8 +28,9 @@ Synthetic MongoDB operational data + synthetic CSV files
 
 The local services, dependency image, minimal dbt project, synthetic MongoDB
 seed records, synthetic CSV source files, and PostgreSQL schema initialization
-scripts are present. Extraction/loading jobs, warehouse models, tests,
-reporting queries, and dashboards are planned but not yet implemented.
+scripts are present. Python jobs extract the source data and load PostgreSQL raw
+and audit tables. Warehouse models, transformation tests, reporting queries,
+and dashboards are planned but not yet implemented.
 
 ## Technology
 
@@ -208,6 +209,48 @@ docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\dt au
 docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "\d raw.csv_billing_exports"
 ```
 
+### Run the local ETL
+
+With the services running, seed MongoDB and run the complete extraction and
+loading flow:
+
+```powershell
+make seed
+make etl
+```
+
+Without GNU Make, use the equivalent Docker commands:
+
+```powershell
+docker compose --profile tools build tools
+docker compose --profile tools run --rm tools python scripts/seed_mongo.py
+docker compose --profile tools run --rm tools python scripts/run_etl.py
+```
+
+The ETL writes one JSONL file per MongoDB collection under:
+
+```text
+raw_archive/mongo/{collection}/date=YYYY-MM-DD/data.jsonl
+```
+
+It then loads the JSONL records and the three files in `data/input/` into the
+matching `raw` tables. MongoDB rows are updated or inserted by `source_id`; CSV
+rows are updated or inserted by their source record IDs. Repeating the ETL
+therefore refreshes existing raw rows instead of duplicating them. Audit run
+and file history rows are intentionally appended for every execution.
+
+Inspect recent ETL activity with:
+
+```powershell
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT load_run_id, pipeline_name, status, records_loaded, started_at FROM audit.load_runs ORDER BY load_run_id DESC LIMIT 10;"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT file_path, status, row_count, loaded_at FROM audit.file_load_history ORDER BY file_load_history_id DESC LIMIT 20;"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT count(*) FROM raw.mongo_patients;"
+docker compose exec -T postgres psql -U warehouse -d provider_ops_dwh -c "SELECT count(*) FROM raw.csv_billing_exports;"
+```
+
+`make reset` stops the stack and deletes the MongoDB, PostgreSQL, and Metabase
+volumes. It does not delete ignored archive files under `raw_archive/`.
+
 ### Open Metabase
 
 Open [http://localhost:3000](http://localhost:3000), or use the port configured
@@ -226,7 +269,7 @@ docker compose --profile tools build tools
 docker compose --profile tools run --rm tools dbt debug --project-dir dbt --profiles-dir dbt
 ```
 
-No extraction or loading jobs are implemented yet.
+dbt transformations and analytical models are not implemented yet.
 
 ## Repository layout
 

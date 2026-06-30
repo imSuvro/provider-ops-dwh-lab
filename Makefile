@@ -1,12 +1,14 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup up down reset ps logs build-tools dbt-debug
+.PHONY: help setup up down seed etl reset ps logs build-tools dbt-debug
 
 help:
 	@echo "Available commands:"
 	@echo "  make setup       Create .env from .env.example if needed"
 	@echo "  make up          Start PostgreSQL, MongoDB, and Metabase"
 	@echo "  make down        Stop the local stack"
+	@echo "  make seed        Load the synthetic MongoDB demo records"
+	@echo "  make etl         Extract sources and load PostgreSQL raw tables"
 	@echo "  make reset       Stop the stack and delete local volumes"
 	@echo "  make ps          Show service status"
 	@echo "  make logs        Follow service logs"
@@ -21,6 +23,12 @@ up:
 
 down:
 	docker compose down
+
+seed: build-tools
+	docker compose --profile tools run --rm tools python scripts/seed_mongo.py
+
+etl: build-tools
+	docker compose --profile tools run --rm tools python scripts/run_etl.py
 
 reset:
 	docker compose down --volumes

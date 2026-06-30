@@ -6,7 +6,7 @@ CREATE SCHEMA IF NOT EXISTS marts;
 CREATE SCHEMA IF NOT EXISTS audit;
 
 COMMENT ON SCHEMA raw IS
-    'Append-oriented copies of source records before transformation.';
+    'Latest extracted source records before transformation.';
 COMMENT ON SCHEMA staging IS
     'Cleaned and standardized intermediate warehouse models.';
 COMMENT ON SCHEMA marts IS

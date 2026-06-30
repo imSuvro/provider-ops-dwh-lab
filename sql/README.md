@@ -3,8 +3,8 @@
 `init/` contains ordered PostgreSQL initialization scripts:
 
 1. `001_create_schemas.sql` creates `raw`, `staging`, `marts`, and `audit`.
-2. `002_create_raw_tables.sql` creates append-friendly MongoDB snapshot tables
-   and typed CSV source tables in `raw`.
+2. `002_create_raw_tables.sql` creates MongoDB raw document tables and typed CSV
+   source tables in `raw`.
 3. `003_create_audit_tables.sql` creates load run, load error, and file history
    tables in `audit`.
 

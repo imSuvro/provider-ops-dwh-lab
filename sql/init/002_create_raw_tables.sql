@@ -176,23 +176,23 @@ CREATE INDEX IF NOT EXISTS csv_customer_roster_uploads_source_file_idx
     ON raw.csv_customer_roster_uploads (source_file_name, source_row_number);
 
 COMMENT ON TABLE raw.mongo_customers IS
-    'Raw snapshots from the MongoDB customers collection.';
+    'Latest raw records from the MongoDB customers collection.';
 COMMENT ON TABLE raw.mongo_providers IS
-    'Raw snapshots from the MongoDB providers collection.';
+    'Latest raw records from the MongoDB providers collection.';
 COMMENT ON TABLE raw.mongo_patients IS
-    'Raw snapshots from the MongoDB patients collection.';
+    'Latest raw records from the MongoDB patients collection.';
 COMMENT ON TABLE raw.mongo_programs IS
-    'Raw snapshots from the MongoDB programs collection.';
+    'Latest raw records from the MongoDB programs collection.';
 COMMENT ON TABLE raw.mongo_enrollments IS
-    'Raw snapshots from the MongoDB enrollments collection.';
+    'Latest raw records from the MongoDB enrollments collection.';
 COMMENT ON TABLE raw.mongo_consents IS
-    'Raw snapshots from the MongoDB consents collection.';
+    'Latest raw records from the MongoDB consents collection.';
 COMMENT ON TABLE raw.mongo_timer_sessions IS
-    'Raw snapshots from the MongoDB timer_sessions collection.';
+    'Latest raw records from the MongoDB timer_sessions collection.';
 COMMENT ON TABLE raw.mongo_device_orders IS
-    'Raw snapshots from the MongoDB device_orders collection.';
+    'Latest raw records from the MongoDB device_orders collection.';
 COMMENT ON TABLE raw.mongo_coordinator_notes IS
-    'Raw snapshots from the MongoDB coordinator_notes collection.';
+    'Latest raw records from the MongoDB coordinator_notes collection.';
 COMMENT ON TABLE raw.csv_vob_files IS
     'Typed raw rows loaded from synthetic VOB CSV files.';
 COMMENT ON TABLE raw.csv_billing_exports IS
