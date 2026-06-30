@@ -45,6 +45,8 @@ docker compose up -d postgres mongodb metabase
 docker compose ps
 docker compose logs <service-name>
 docker compose --profile tools build tools
+docker compose --profile tools run --rm tools python scripts/seed_mongo.py
+docker compose --profile tools run --rm tools python scripts/run_etl.py
 docker compose --profile tools run --rm tools dbt debug --project-dir dbt --profiles-dir dbt
 docker compose down
 git status
@@ -57,7 +59,8 @@ it only when a reset is intended. Never paste `.env` values into a help request.
 ## Expected folder structure
 
 ```text
-data/csv/       Synthetic CSV inputs
+data/input/     Committed synthetic CSV inputs
+data/csv/       Future generated CSV files
 raw_archive/    Generated immutable-style snapshots
 scripts/        Python extraction/loading jobs
 dbt/            dbt project, models, tests, and configuration
@@ -75,8 +78,11 @@ Some folders are placeholders until their MVP task is implemented.
 - Metabase uses `localhost` instead of Docker service name `postgres`.
 - The tools image is stale after dependency changes.
 - PostgreSQL or MongoDB is not healthy before a job starts.
+- PostgreSQL initialization scripts have not been applied to an existing
+  volume.
+- A required archive partition or CSV input file is missing or malformed.
 - dbt is using the wrong project/profile path or database credentials.
-- Generated folders, schemas, tables, or models have not been implemented yet.
+- Downstream dbt models or reports have not been implemented yet.
 - Local volumes contain stale state from an earlier schema version.
 
 ## What to paste when asking for help
