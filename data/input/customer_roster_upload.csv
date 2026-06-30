@@ -1,0 +1,13 @@
+roster_record_id,customer_id,patient_id,provider_id,first_name,last_name,date_of_birth,state,phone,program_interest,uploaded_at
+roster_001,cust_001,patient_001,provider_001,Avery,Sample,1958-04-12,IL,+1-202-555-0101,RPM,2025-12-15T09:00:00Z
+roster_002,cust_001,patient_002,provider_001,Jordan,Example,1964-09-23,IL,+1-202-555-0102,RTM,2025-12-15T09:00:00Z
+roster_003,cust_001,patient_003,provider_002,Taylor,Demo,1971-01-08,WI,+1-202-555-0103,CCM,2025-12-15T09:00:00Z
+roster_004,cust_001,patient_004,provider_002,Morgan,Test,1955-11-30,IL,+1-202-555-0104,CoCM,2025-12-15T09:00:00Z
+roster_005,cust_002,patient_005,provider_003,Riley,Sample,1960-06-17,MA,+1-202-555-0105,APCM,2025-12-15T09:00:00Z
+roster_006,cust_002,patient_006,provider_003,Casey,Example,1974-02-14,RI,+1-202-555-0106,CCM,2025-12-15T09:00:00Z
+roster_007,cust_002,patient_007,provider_004,Quinn,Demo,1980-08-02,MA,+1-202-555-0107,RTM,2025-12-15T09:00:00Z
+roster_008,cust_002,patient_008,provider_004,Cameron,Test,1968-12-19,NH,+1-202-555-0108,CoCM,2025-12-15T09:00:00Z
+roster_009,cust_003,patient_009,provider_005,Dakota,Sample,1959-03-05,CO,+1-202-555-0109,CCM,2025-12-15T09:00:00Z
+roster_010,cust_003,patient_010,provider_005,Robin,Example,1977-07-27,CO,+1-202-555-0110,RPM,2025-12-15T09:00:00Z
+roster_011,cust_003,patient_011,provider_006,Skyler,Demo,1966-10-10,UT,+1-202-555-0111,CoCM,2025-12-15T09:00:00Z
+roster_012,cust_003,patient_012,provider_006,Drew,Test,1983-05-21,CO,+1-202-555-0112,RTM,2025-12-15T09:00:00Z
