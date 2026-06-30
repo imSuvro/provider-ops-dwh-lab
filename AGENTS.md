@@ -90,6 +90,13 @@ fix(ABC-123): handle empty source files
 Never invent a ticket ID. If none is provided, commit normally without one. See
 [`docs/BRANCHING_AND_COMMITS.md`](docs/BRANCHING_AND_COMMITS.md).
 
+### Pull requests
+
+After committing and pushing a task branch, create a pull request against
+`main` when safe. Do not merge the pull request; human review owns merge
+decisions. If PR creation is unavailable, return the exact GitHub URL or `gh`
+command the human can use to create it.
+
 ### Documentation
 
 Update documentation whenever behavior, architecture, commands, data contracts,
