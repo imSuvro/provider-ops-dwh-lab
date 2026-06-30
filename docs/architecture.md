@@ -114,9 +114,11 @@ from it so they use the same readiness logic.
 ### 7. Reporting
 
 Metabase can connect to PostgreSQL over the Docker network and query the mart
-tables. Direct SQL can be used for validation and exploration.
+tables. The reporting SQL in `sql/reports/` supports six manual dashboard
+sections, and direct SQL can be used for validation and exploration.
 
-Dashboard definitions and production reporting governance remain future work.
+The project documents how to create the dashboard manually but does not
+preconfigure Metabase. Production reporting governance remains future work.
 
 ## Rerun behavior
 
