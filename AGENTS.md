@@ -1,0 +1,108 @@
+# AI Agent Guide
+
+## Project purpose
+
+This repository is a personal learning and portfolio lab for a small healthcare
+operations data warehouse. It should help managers, technical leaders,
+recruiters, and beginner engineers understand practical warehouse concepts
+without using real company or patient data.
+
+## Intended architecture
+
+```text
+Synthetic MongoDB data + synthetic CSV files
+  -> Python extraction/loading jobs
+  -> local raw_archive
+  -> PostgreSQL raw, staging, and marts schemas
+  -> dbt Core transformations and tests
+  -> Metabase dashboards and SQL reports
+```
+
+Local components deliberately stand in for possible production components:
+PostgreSQL for Amazon RDS PostgreSQL, `raw_archive/` for a controlled Amazon S3
+archive, Python jobs for scheduled jobs/cron/Lambda, and Metabase for Metabase
+or QuickSight reporting. These are learning mappings, not production claims.
+
+## MVP boundaries
+
+The MVP includes synthetic MongoDB and CSV sources, Python extraction/loading,
+a local raw archive, PostgreSQL raw/staging/marts schemas, dbt Core models and
+tests, SQL reports, Metabase guidance, and clear documentation.
+
+The MVP excludes real PHI, real company data, AWS deployment, real-time
+streaming, Kafka, Redshift, Aurora, production CDC, a frontend application, and
+authentication. Do not expand scope without explicit human approval. See
+[`docs/SCOPE_GUARDRAILS.md`](docs/SCOPE_GUARDRAILS.md).
+
+## Data safety
+
+- Use only clearly synthetic, invented data.
+- Never add PHI, production exports, real patient/provider identifiers, company
+  confidential data, secrets, or credentials.
+- Keep `.env` and generated source/archive data out of Git.
+- Stop and request human review if data provenance or sensitivity is unclear.
+
+## Working rules
+
+- Inspect the task, current branch, working tree, and relevant files before
+  editing.
+- Keep changes small, scoped, and easy to review. Preserve unrelated work.
+- Do not implement adjacent features unless the task explicitly requests them.
+- Do not describe planned components as implemented or make unsupported
+  production, scale, compliance, security, or business-impact claims.
+
+### Branches
+
+Choose a branch dynamically from the task using:
+
+```text
+<type>/<short-kebab-case-purpose>
+```
+
+Allowed types are `feature`, `fix`, `docs`, `chore`, `refactor`, `test`, and
+`spike`. Examples: `docs/project-context`, `feature/python-etl`,
+`feature/dbt-staging`, `chore/ci-setup`, and `spike/aws-dms-research`.
+Do not hard-code prompt numbers or reserve fixed future branch names.
+
+### Commits
+
+This is a personal project, not a company Jira project. Ticket IDs are optional
+and must not block a commit.
+
+Use Conventional Commits by default:
+
+```text
+<type>: <short description>
+```
+
+Example without a ticket:
+
+```text
+docs: add project context and AI guardrails
+```
+
+If the human provides a ticket ID, include it, for example:
+
+```text
+fix(ABC-123): handle empty source files
+```
+
+Never invent a ticket ID. If none is provided, commit normally without one. See
+[`docs/BRANCHING_AND_COMMITS.md`](docs/BRANCHING_AND_COMMITS.md).
+
+### Documentation
+
+Update documentation whenever behavior, architecture, commands, data contracts,
+scope, or setup changes. Keep the README concise and link detailed material
+from `docs/`. Record lasting architecture choices in
+[`docs/DECISION_LOG.md`](docs/DECISION_LOG.md).
+
+### Validation and review
+
+- Run the smallest relevant automated checks, then broader checks when risk
+  warrants them.
+- For documentation-only changes, verify links, commands, formatting, scope
+  consistency, and `git diff --check`.
+- Report checks run and checks skipped, including the reason.
+- Human review is required before merge. Humans own architecture decisions,
+  data safety, production readiness, and final acceptance.
