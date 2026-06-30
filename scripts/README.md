@@ -21,4 +21,5 @@ The ETL scripts load MongoDB and PostgreSQL settings from `.env`, log progress
 to the console, and write PostgreSQL load and file audit records. Raw rows use
 simple source-key update/insert behavior for repeatable local runs.
 
-dbt transformation and reporting jobs are not implemented yet.
+dbt transformation and reporting assets live under `dbt/` and `sql/reports/`;
+the root `Makefile` orchestrates them with the Python jobs through `make demo`.
