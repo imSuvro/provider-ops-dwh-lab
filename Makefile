@@ -25,7 +25,12 @@ help:
 	@echo "  make dbt-test    Run dbt data tests"
 
 setup:
+ifeq ($(OS),Windows_NT)
+	@if not exist .env copy /Y .env.example .env >NUL
+else
 	@test -f .env || cp .env.example .env
+endif
+	@echo Local environment file is ready.
 
 up:
 	$(DOCKER) compose up -d postgres mongodb metabase
