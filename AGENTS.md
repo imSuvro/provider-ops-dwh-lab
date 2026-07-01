@@ -82,6 +82,24 @@ Allowed types are `feature`, `fix`, `docs`, `chore`, `refactor`, `test`, and
 `feature/dbt-staging`, `chore/ci-setup`, and `spike/aws-dms-research`.
 Do not hard-code prompt numbers or reserve fixed future branch names.
 
+### Git workflow
+
+For every task:
+
+1. Inspect the current branch and working tree before making changes.
+2. If the current branch is `main`, pull the latest `main` before starting.
+3. If the current branch is not `main`, confirm that it matches the task.
+4. If the current branch does not match the task, switch to `main`, pull the
+   latest `main`, and create a task-specific branch using the naming rules
+   above.
+5. Keep the branch focused on the current task only.
+6. Do not merge the task branch into `main`.
+7. Commit changes with a Conventional Commit message.
+8. Push the branch to `origin` when safe.
+
+If the working tree contains uncommitted changes unrelated to the task, stop
+and ask the human before editing, switching branches, or overwriting anything.
+
 ### Commits
 
 This is a personal project, not a company Jira project. Ticket IDs are optional
@@ -137,3 +155,16 @@ from `docs/`. Record lasting architecture choices in
 - Report checks run and checks skipped, including the reason.
 - Human review is required before merge. Humans own architecture decisions,
   data safety, production readiness, and final acceptance.
+
+### Final response
+
+Every completed task must report:
+
+- the current branch
+- whether `main` was pulled
+- whether the task branch was created or reused
+- the commit hash
+- the pushed branch URL, when available
+- checks run
+- files changed
+- anything requiring manual review
